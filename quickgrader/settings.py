@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'kgk#5f)3e9-psz$9u+tqcws^^2*uj@9r#$oz+=2nmabth3#%aj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['quick-graderr.herokuapp.com', 'quick-grader.herokuapp.com']
 
@@ -138,6 +138,7 @@ STATICFILES_DIRS = [
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
+    'http://quick-graderr.herokuapp.com/',
 ]
 
 REST_FRAMEWORK = {
