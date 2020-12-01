@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Header.css";
-import { Navbar, Nav, NavDropdown } from "react-bootstrap";
+import { Navbar, Nav } from "react-bootstrap";
 import axios from "axios";
 
 function Header(props) {
@@ -8,7 +8,7 @@ function Header(props) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/auth/user/", {
+      .get("http://quick-grader.herokuapp.com/auth/user/", {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Token ${props.token}`,
@@ -23,16 +23,16 @@ function Header(props) {
 
   let authElement = !props.token ? (
     <>
-      <Nav.Link className="mx-3" href="/login">
+      <Nav.Link className="mx-2" href="/login">
         Login
       </Nav.Link>
-      <Nav.Link className="mx-3" href="/register">
+      <Nav.Link className="mx-2" href="/register">
         Register
       </Nav.Link>
     </>
   ) : (
     <Nav.Link
-      className="mx-3"
+      className="mx-2"
       onClick={() => {
         localStorage.removeItem("token");
       }}
@@ -43,7 +43,7 @@ function Header(props) {
   );
 
   return (
-    <>
+    <div className="navbar">
       <Navbar
       fixed="top"
         collapseOnSelect
@@ -78,7 +78,7 @@ function Header(props) {
           <Nav>{authElement}</Nav>
         </Navbar.Collapse>
       </Navbar>
-    </>
+    </div>
   );
 }
 

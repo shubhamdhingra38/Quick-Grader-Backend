@@ -7,10 +7,10 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('test/', include('quiz.urls')),
     path('ml/', include('ml.urls')),
-    path('', TemplateView.as_view(template_name='index.html')),
+    # path('', TemplateView.as_view(template_name='index.html')),
 ]
 
 #https://stackoverflow.com/questions/40826295/react-routing-and-django-url-conflict
-urlpatterns += [
-    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")), 
-]
+# urlpatterns += [
+#     # re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name="index.html")), 
+# ]
