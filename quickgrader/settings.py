@@ -25,7 +25,7 @@ SECRET_KEY = 'kgk#5f)3e9-psz$9u+tqcws^^2*uj@9r#$oz+=2nmabth3#%aj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['quick-graderr.herokuapp.com', 'quick-grader.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['quick-graderr.herokuapp.com', 'quick-grader.herokuapp.com', '127.0.0.1', 'http://localhost:3000/',]
 
 
 # Application definition

@@ -93,4 +93,6 @@ class Answer(models.Model):
     score = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.response.taken_by.__str__() + ":" + self.short_ans
+        if self.question.type == 1:
+            return self.response.taken_by.__str__() + ":" + self.short_ans
+        return self.response.taken_by.__str__() + ":" + str(self.choice_id)

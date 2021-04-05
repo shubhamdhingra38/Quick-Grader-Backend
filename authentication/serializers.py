@@ -31,7 +31,6 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Username already exists")
         user.save()
         token = Token.objects.create(user=user)
-        print(token.key)
         group_name = validated_data.pop('group')
         group = Group.objects.get(name=group_name)
         group.user_set.add(user)

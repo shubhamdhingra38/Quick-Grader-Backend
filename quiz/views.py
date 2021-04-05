@@ -138,41 +138,52 @@ class Grade(APIView):
                               TokenAuthentication, BasicAuthentication]
 
     def post(self, request):
-        type_grading = int(request.data['type'])
-        try:
-            if type_grading == 1:
-                total_score = 0
-                response_id = int(request.data['responseID'])
-                response = Response.objects.get(id=response_id)
-                # print(response)
-                answers = Answer.objects.filter(response=response)
-                for answer in answers:
-                    if answer.question.type == 2:  # MCQ
-                        if Choice.objects.get(id=answer.choice_id).is_answer:
-                            total_score += answer.question.maximum_score
-                            answer.score = answer.question.maximum_score
-                            answer.save()
-                # print(answers)
-                grades = request.data['grade']
-                for q_id in grades.keys():
-                    question = Question.objects.get(id=int(q_id))
-                    assert int(grades[q_id]) <= question.maximum_score
-                    # print('ques', question)
-                    ans = answers.get(question=question)
-                    ans.score = int(grades[q_id])
-                    total_score += int(grades[q_id])
-                    ans.save()
+        print(f'{request.user} wants to grade')
 
-                response.total_score = total_score
-                response.graded = True
-                response.save()
+        grade_info = request.data['gradeInfo']
+        response_id = request.data['responseID']
+        response = Response.objects.get(id=response_id)
+        for answer_id in grade_info.keys():
+            grade = grade_info[answer_id]
+            answer = Answer.objects.get(id=answer_id)
+            question = Question.objects.get(id=answer.question_id)
 
-            else:
-                answer = Answer.objects.get(id=request.data['answerID'])
-                answer.score = int(request.data['grade'])
+            assert 0 <= grade <= question.maximum_score
+
+            answer.score = grade
+            answer.save()
+
+        # MCQs should be graded automatically (already know the correct answer)
+
+        # get the corresponding quiz
+        quiz = Quiz.objects.get(id=response.test_id)
+        # get all the corresponding answers to response
+        # get all the questions in the quiz
+        questions = Question.objects.filter(test=quiz)
+        answers = Answer.objects.filter(response=response)
+        for question in questions:
+            if question.type == 2:  # mcq
+                answer = Answer.objects.get(
+                    response=response, question=question)
+                print('got answer', answer)
+                choices = Choice.objects.filter(question=question)
+                for choice in choices:
+                    if answer.choice_id == choice.id:
+                        if choice.is_answer:
+                            print('MCQ is correct')
+                            answer.score = question.maximum_score
+                        else:
+                            answer.score = 0
+                            print('Wrong answer for MCQ')
+                            break
                 answer.save()
-        except AssertionError:
-            return APIResponse({"message": "Can not assign a value greater than maximum score"}, status=status.HTTP_400_BAD_REQUEST)
+
+        total_score = 0
+        for answer in answers:
+            total_score += answer.score
+        response.total_score = total_score
+        response.graded = True
+        response.save()
 
         return APIResponse({"message": "Successfully graded"}, status=status.HTTP_200_OK)
 
