@@ -144,7 +144,7 @@ class Grade(APIView):
         response_id = request.data['responseID']
         response = Response.objects.get(id=response_id)
         for answer_id in grade_info.keys():
-            grade = grade_info[answer_id]
+            grade = int(grade_info[answer_id])
             answer = Answer.objects.get(id=answer_id)
             question = Question.objects.get(id=answer.question_id)
 
