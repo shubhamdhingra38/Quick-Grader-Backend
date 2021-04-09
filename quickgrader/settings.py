@@ -25,7 +25,8 @@ SECRET_KEY = 'kgk#5f)3e9-psz$9u+tqcws^^2*uj@9r#$oz+=2nmabth3#%aj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['quick-graderr.herokuapp.com', 'quick-grader.herokuapp.com', '127.0.0.1', 'http://localhost:3000/',]
+ALLOWED_HOSTS = ['quick-graderr.herokuapp.com',
+                 'quick-grader.herokuapp.com', '127.0.0.1', 'http://localhost:3000/', ]
 
 
 # Application definition
@@ -132,8 +133,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'reactapp', 'build', 'static' ), # update the STATICFILES_DIRS
-    os.path.join(BASE_DIR, 'reactapp', 'build' ) # update the STATICFILES_DIRS
+    # update the STATICFILES_DIRS
+    os.path.join(BASE_DIR, 'reactapp', 'build', 'static'),
+    os.path.join(BASE_DIR, 'reactapp', 'build')  # update the STATICFILES_DIRS
 ]
 
 CORS_ORIGIN_WHITELIST = [
@@ -154,3 +156,6 @@ REST_FRAMEWORK = {
 }
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
