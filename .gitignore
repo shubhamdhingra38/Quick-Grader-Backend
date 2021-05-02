@@ -1,6 +1,7 @@
 .DS_Store
-.*pyc
 ./quickgrader/universal-sentence-encoder_4/*
 venv/*
 venv2/*
 reactapp
+cached_models/
+*.pyc
