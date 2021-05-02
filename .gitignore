@@ -5,3 +5,4 @@ venv2/*
 reactapp
 cached_models/
 *.pyc
+universal-sentence-encoder-v4/

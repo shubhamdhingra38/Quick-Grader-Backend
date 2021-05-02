@@ -24,9 +24,10 @@ np.random.seed(42)
 
 PERCENTAGE_CLUSTERS = 0.3
 
-module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
-model = hub.load(module_url)
-print("module %s loaded" % module_url)
+# module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
+# model = hub.load(module_url)
+# print("module %s loaded" % module_url)
+model = hub.load('universal-sentence-encoder-v4')
 
 
 def embed(input):
@@ -88,12 +89,12 @@ def cluster_answers(answers, question_id):
     return cluster_centers
 
 
-class ClusterGrade(APIView):
+class ClustersGenerate(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication, BasicAuthentication]
 
     # ask to grade these answers
-    def get(self, request):
+    def post(self, request):
         """
         Get clusters for every question in this quiz.
         """
@@ -117,6 +118,20 @@ class ClusterGrade(APIView):
 
         return APIResponse(response)
 
+
+def grade_answer(answer_id, grade):
+    answer = Answer.objects.get(pk=answer_id)
+    answer.response.total_score -= answer.score
+    answer.response.total_score += grade
+    answer.response.save()
+    answer.score = grade
+    answer.save()
+
+
+class ClusterGrade(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
+
     # after grading the answers (centroids), grade rest of the points
     def post(self, request):
         question_id = request.data['questionID']
@@ -128,16 +143,11 @@ class ClusterGrade(APIView):
             map_centroid_to_answer_ids = pickle.load(f)
         for centroid_id in grades:
             grade = grades[centroid_id]
-            centroid_answer = answers.get(pk=centroid_id)
-            centroid_answer.score = grade
-            centroid_answer.save()
-            
-            other_answers_in_cluster = map_centroid_to_answer_ids[int(
-                centroid_id)]
+            grade_answer(centroid_id, grade)
+            other_answers_in_cluster = map_centroid_to_answer_ids[int(centroid_id)]
             for answer_id in other_answers_in_cluster:
-                answer = answers.get(pk=answer_id)
-                answer.score = grade
-                answer.save()
+                grade_answer(answer_id, grade)
+                
 
         return APIResponse({"msg": "Ok"})
 
