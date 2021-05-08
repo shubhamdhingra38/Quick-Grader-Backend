@@ -6,3 +6,5 @@ reactapp
 cached_models/
 *.pyc
 universal-sentence-encoder-v4/
+.sqlite3
+media/

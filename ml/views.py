@@ -1,10 +1,11 @@
 """
-This will contain all the ML logic (might have to go for a separate server for just ML app)
+This contains all the ML logic
 """
 
 import pickle
 from sklearn.metrics import pairwise_distances_argmin_min
 from sklearn.cluster import KMeans
+from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 import tensorflow_hub as hub
 import tensorflow as tf
@@ -16,6 +17,8 @@ from rest_framework.response import Response as APIResponse
 from random import shuffle, randint
 import json
 from collections import defaultdict
+from ml import preprocess_text
+from scipy import spatial
 
 """
 Machine learning stuff
@@ -152,26 +155,48 @@ class ClusterGrade(APIView):
         return APIResponse({"msg": "Ok"})
 
 
-"""
-Stuff to mock the machine learning API on Heroku
-"""
+def cosine_similarity(vec1, vec2):
+    return 1 - spatial.distance.cosine(vec1, vec2)
+    
+
+def get_similar_answers(answers, threshold):
+    answer_texts = [answer.short_ans for answer in answers]
+    preprocessed_answers = [' '.join(preprocess_text(answer)) for answer in answer_texts]
+    cv = CountVectorizer(stop_words='english')
+    vectors = cv.fit_transform(preprocessed_answers).toarray()
+    print(vectors)
+    most_similar = defaultdict(list)
+    for i, v1 in enumerate(vectors):
+        similar = []
+        for j, v2 in enumerate(vectors):
+            if i == j:
+                continue
+            if cosine_similarity(v1, v2) >= threshold:
+                most_similar[answers[i].id].append(answers[j].id)
+    return most_similar
 
 
-N_GROUP_MIN = 2
-N_GROUP_MAX = 5
 
+class PlagiarismDetectionView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
 
-def generate_random_clusters(question):
-    answers = Answer.objects.filter(question=question)
-    answers = list(answers)
-    shuffle(answers)
+    def post(self, request):
+        quiz_id = int(request.data['quizID'])
+        plag_threshold = float(request.data['threshold'])
+        quiz = Quiz.objects.get(pk=quiz_id)
+        questions = Question.objects.filter(test=quiz)
+        similarity_by_responses = defaultdict(lambda: defaultdict(list))
+        for question in questions:
+            if question.type == 1: #short answer
+                answers = Answer.objects.filter(question=question)
+                similar_answers_dict = get_similar_answers(answers, plag_threshold)
+                print(similar_answers_dict)
+                for answer in answers:
+                    answer_id = answer.id
+                    response_id = answer.response.id
+                    for similar_answers_id  in similar_answers_dict[answer_id]:
+                        similar_answer = Answer.objects.get(id=similar_answers_id)
+                        similarity_by_responses[response_id][similar_answer.response.id].append(question.id)
 
-    grouped_items = []
-    i = 0
-    while i < len(answers):
-        take = min(randint(N_GROUP_MIN, N_GROUP_MAX), len(answers) - i)
-        items = [answer.id for answer in answers[i:i+take]]
-        grouped_items.append(items)
-        i += take
-
-    return grouped_items
+        return APIResponse(similarity_by_responses)
