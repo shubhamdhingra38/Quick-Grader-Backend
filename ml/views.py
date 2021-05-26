@@ -200,3 +200,14 @@ class PlagiarismDetectionView(APIView):
                         similarity_by_responses[response_id][similar_answer.response.id].append(question.id)
 
         return APIResponse(similarity_by_responses)
+
+class PlagiarismChangeView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
+
+    def post(self, request):
+        response = Response.objects.get(id=request.data['responseID'])
+        status = request.data['plagiarismStatus']
+        response.plag = status
+        response.save()
+        return APIResponse({"message": f"Set plagiarism to {status}"})
