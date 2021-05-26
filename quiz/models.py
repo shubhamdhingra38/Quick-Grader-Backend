@@ -57,6 +57,7 @@ class Response(models.Model):
     total_score = models.IntegerField(default=0)
     graded = models.BooleanField(default=False)
     plag = models.BooleanField(default=False)
+    taken_on = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.test.title + ":" + self.taken_by.__str__()

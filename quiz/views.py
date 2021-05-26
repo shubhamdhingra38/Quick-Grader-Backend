@@ -12,10 +12,10 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from .models import Quiz, Question, Choice, Answer, Response
 from rest_framework import viewsets, mixins
 from rest_framework.views import APIView
-# from ml.views import grade_others_in_cluster
 import csv
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core import serializers
 
 
 class QuizListView(viewsets.ModelViewSet):
@@ -248,3 +248,27 @@ def set_plagiarism(request, response_id):
     except ObjectDoesNotExist:
         return JsonResponse({"message": "The code entered was incorrect"}, status=status.HTTP_400_BAD_REQUEST)
     return JsonResponse({"message": f"Successfully marked the response as plagiarized"}, status=status.HTTP_200_OK)
+
+class ResponseLogsView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication,
+                              TokenAuthentication, BasicAuthentication]
+
+    def get(self, request):
+        user = request.user
+        created_tests = Quiz.objects.filter(author=user)
+        all_responses = Response.objects.filter(test__in=created_tests).order_by('-taken_on')
+        logs = list(all_responses.values())
+        #this is bad but works for now
+        for log in logs:
+            taken_by = log['taken_by_id']
+            username = User.objects.get(pk=taken_by).username
+
+            test_id = log['test_id']
+            title = Quiz.objects.get(pk=test_id).title
+
+            log['username'] = username
+            log['test'] = title
+
+
+        return APIResponse({"responses": logs})
