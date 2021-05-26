@@ -16,6 +16,7 @@ import csv
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
+from authentication.models import Profile
 
 
 class QuizListView(viewsets.ModelViewSet):
@@ -256,10 +257,18 @@ class ResponseLogsView(APIView):
 
     def get(self, request):
         user = request.user
-        created_tests = Quiz.objects.filter(author=user)
-        all_responses = Response.objects.filter(test__in=created_tests).order_by('-taken_on')
-        logs = list(all_responses.values())
+        profile = Profile.objects.get(user=user)
+
         #this is bad but works for now
+
+        if profile.group == "Student":
+            all_responses = Response.objects.filter(taken_by=user).order_by('-taken_on')
+        else:
+            created_tests = Quiz.objects.filter(author=user)
+            all_responses = Response.objects.filter(test__in=created_tests).order_by('-taken_on')
+        
+        logs = list(all_responses.values())
+        #format it properly
         for log in logs:
             taken_by = log['taken_by_id']
             username = User.objects.get(pk=taken_by).username
