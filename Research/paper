@@ -1,0 +1,15 @@
+https://learningatscale.acm.org/las2014/talks/paper_michael_brooks.pdf
+
+https://www.microsoft.com/en-us/research/wp-content/uploads/2014/03/Divide-And-Correct_LearningAtScale2014.pdf
+
+
+The clustering algorithm computes a learned distance metric over pairs of answers, based on difference in answer length, words  with  matching  base  forms, tf-idf  vector  similarity, lowercase  string  match,  and  Wikipedia-based  LSA  similar-ity. 
+
+Design: Selecting a cluster causes its nested subclusters and answers to appear, while subsequent selection  of  a  subcluster  filters  the  answers  displayed.  This design  allows  users  to  quickly  and  easily  explore  or  drill down into the answers wherever the contents of a challeng-ing cluster may demand it. 
+Idea: Generate a Word Cloud
+
+Cluster Summaries: how to present sum-maries  of  clusters  and  subclusters  so  as  to  enable users  to make informed decisions about where to explore.
+
+
+Use of Inheritance of Clusters to grade subclusters:
+Similarly, individual answers inherit the  grade  of  their  parent  subcluster  or  cluster  unless  they have been specifically marked by the user.
